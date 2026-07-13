@@ -1,0 +1,46 @@
+services:
+  grafana:
+    image: grafana/grafana:11.5.0
+    container_name: ${GRAFANA_CONTAINER_NAME:-grafana}
+    hostname: ${GRAFANA_HOSTNAME:-grafana}
+    restart: ${GRAFANA_RESTART_POLICY:-unless-stopped}
+    env_file:
+      - ./.env
+    environment:
+      GF_SERVER_HTTP_PORT: ${GRAFANA_SERVER_PORT:-3000}
+      GF_SERVER_DOMAIN: ${GRAFANA_SERVER_DOMAIN:-localhost}
+      GF_SERVER_ROOT_URL: ${GRAFANA_SERVER_ROOT_URL:-http://localhost:3000}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change-me-password}
+      GF_DATABASE_TYPE: ${GRAFANA_DATABASE_TYPE:-mysql}
+      GF_DATABASE_HOST: ${GRAFANA_DATABASE_HOST:-mariadb:3306}
+      GF_DATABASE_NAME: ${GRAFANA_DATABASE_NAME:-grafana}
+      GF_DATABASE_USER: ${GRAFANA_DATABASE_USER:-grafana}
+      GF_DATABASE_PASSWORD: ${GRAFANA_DATABASE_PASSWORD:-change-me-password}
+      GF_DATABASE_SSL_MODE: ${GRAFANA_DATABASE_SSL_MODE:-disable}
+      GF_DATABASE_MAX_OPEN_CONN: ${GRAFANA_DATABASE_MAX_OPEN_CONN:-100}
+      GF_DATABASE_MAX_IDLE_CONN: ${GRAFANA_DATABASE_MAX_IDLE_CONN:-25}
+      GF_DATABASE_CONN_MAX_LIFETIME: ${GRAFANA_DATABASE_CONN_MAX_LIFETIME:-14400}
+    ports:
+      - ${GRAFANA_BIND_HOST:-0.0.0.0}:${GRAFANA_BIND_PORT:-3000}:${GRAFANA_SERVER_PORT:-3000}
+    volumes:
+      - ./data:/var/lib/grafana
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -fsS http://127.0.0.1:${GRAFANA_SERVER_PORT:-3000}/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    cpus: ${GRAFANA_CPU_LIMIT:-1.00}
+    mem_limit: ${GRAFANA_MEMORY_LIMIT:-512m}
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - mariadb
+
+networks:
+  mariadb:
+    external: true
+

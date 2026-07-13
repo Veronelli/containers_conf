@@ -1,0 +1,53 @@
+{
+  "title": "MariaDB Overview",
+  "uid": "mariadb-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["mariadb", "puma_core"],
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "title": "Database Size",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_PUMA_CORE}" },
+          "rawSql": "SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb FROM information_schema.tables WHERE table_schema = 'puma_core'",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "megbytes",
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }
+        }
+      }
+    },
+    {
+      "title": "Active Connections",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_PUMA_CORE}" },
+          "rawSql": "SELECT COUNT(*) AS connections FROM information_schema.processlist",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "title": "Tables",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "mysql", "uid": "${DS_PUMA_CORE}" },
+          "rawSql": "SELECT table_name AS table_name, engine, table_rows AS rows, ROUND((data_length + index_length) / 1024 / 1024, 2) AS size_mb, create_time FROM information_schema.tables WHERE table_schema = 'puma_core' ORDER BY size_mb DESC",
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}

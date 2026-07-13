@@ -1,0 +1,16 @@
+FROM grafana/grafana:11.5.0
+
+USER root
+
+RUN apk add --no-cache curl gettext
+
+COPY provisioning /etc/grafana/provisioning
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+RUN chmod 755 /docker-entrypoint.sh             && mkdir -p /var/lib/grafana/dashboards             && chown -R grafana:grafana /etc/grafana/provisioning
+
+COPY dashboards /var/lib/grafana/dashboards
+
+USER grafana
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
