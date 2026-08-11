@@ -11,6 +11,7 @@ services:
       - ./.env
     ports:
       - ${MAIL_STORAGE_BIND_HOST:-0.0.0.0}:${MAIL_STORAGE_BIND_PORT:-143}:${MAIL_STORAGE_PORT:-143}
+      - ${SMTP_BIND_HOST:-0.0.0.0}:${SMTP_BIND_PORT:-25}:25
     volumes:
       - ./data:/data
     cpus: ${MAIL_STORAGE_CPU_LIMIT:-0.5}

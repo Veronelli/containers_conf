@@ -1,11 +1,12 @@
 FROM alpine:latest
 
+RUN apk add --no-cache postfix gettext lmdb
+
 WORKDIR /app
 
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
+COPY main.cf.template /etc/postfix/main.cf.template
 
 RUN chmod 755 ./docker-entrypoint.sh
-
-USER mail
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
