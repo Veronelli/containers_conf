@@ -45,12 +45,10 @@ Helper scripts use the generic naming, never hardcoding a specific runtime:
 ├── .gitignore                        # Ignore .env, data/, logs
 ├── docker-entrypoint.sh              # Startup logic (use envsubst if templating)
 ├── run-compose.sh                    # Wrapper that loads .env and runs compose
-├── provisioning/                     # Runtime-rendered config templates
-│   ├── datasources/*.yaml.template
-│   └── dashboards/*.yaml.template
-├── dashboards/                       # Static dashboard definitions
 └── README.md                         # Composition docs
 ```
+
+Additional folders like `provisioning/`, `dashboards/`, or `data/` are composition-specific — add only what the service actually needs.
 
 ## Security defaults
 
