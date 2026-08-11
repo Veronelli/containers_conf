@@ -1,0 +1,19 @@
+services:
+  mail-storage:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: ${MAIL_STORAGE_IMAGE_NAME:-mail-storage}:${MAIL_STORAGE_IMAGE_TAG:-latest}
+    container_name: ${MAIL_STORAGE_CONTAINER_NAME:-mail-storage}
+    hostname: ${MAIL_STORAGE_HOSTNAME:-mail-storage}
+    restart: ${MAIL_STORAGE_RESTART_POLICY:-unless-stopped}
+    env_file:
+      - ./.env
+    ports:
+      - ${MAIL_STORAGE_BIND_HOST:-0.0.0.0}:${MAIL_STORAGE_BIND_PORT:-143}:${MAIL_STORAGE_PORT:-143}
+    volumes:
+      - ./data:/data
+    cpus: ${MAIL_STORAGE_CPU_LIMIT:-0.5}
+    mem_limit: ${MAIL_STORAGE_MEMORY_LIMIT:-512m}
+    security_opt:
+      - no-new-privileges:true
