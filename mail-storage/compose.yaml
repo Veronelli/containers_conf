@@ -1,6 +1,8 @@
 services:
   mail-storage:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     image: ${MAIL_STORAGE_IMAGE_NAME:-mail-storage}:${MAIL_STORAGE_IMAGE_TAG:-latest}
     container_name: ${MAIL_STORAGE_CONTAINER_NAME:-mail-storage}
     hostname: ${MAIL_STORAGE_HOSTNAME:-mail-storage}
