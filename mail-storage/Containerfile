@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache postfix gettext lmdb
+RUN apk add --no-cache lmdb postfix gettext
 
 WORKDIR /app
 
