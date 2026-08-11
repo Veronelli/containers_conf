@@ -1,0 +1,12 @@
+myhostname = ${SMTP_MYHOSTNAME}
+mydomain = ${SMTP_MYDOMAIN}
+mydestination = ${SMTP_MYDESTINATION}
+mynetworks = ${SMTP_MYNETWORKS}
+inet_interfaces = all
+inet_protocols = ipv4
+maillog_file = /dev/stdout
+default_privs = nobody
+smtpd_relay_restrictions = permit_mynetworks, defer_unauth_destination
+smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination
+alias_maps = lmdb:/etc/postfix/aliases
+alias_database = lmdb:/etc/postfix/aliases

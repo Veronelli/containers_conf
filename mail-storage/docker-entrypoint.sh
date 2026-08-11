@@ -1,4 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-exec tail -f /dev/null
+envsubst < /etc/postfix/main.cf.template > /etc/postfix/main.cf
+newaliases
+
+exec postfix start-fg
