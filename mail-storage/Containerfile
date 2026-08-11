@@ -1,9 +1,11 @@
 FROM alpine:latest
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+WORKDIR /app
 
-RUN chmod 755 /docker-entrypoint.sh
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN chmod 755 ./docker-entrypoint.sh
 
 USER mail
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
