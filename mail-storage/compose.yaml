@@ -9,6 +9,14 @@ services:
     restart: ${MAIL_STORAGE_RESTART_POLICY:-unless-stopped}
     env_file:
       - ./.env
+    environment:
+      MAIL_STORAGE_HOSTNAME: ${MAIL_STORAGE_HOSTNAME:-mail-storage}
+      MAIL_STORAGE_PORT: ${MAIL_STORAGE_PORT:-143}
+      MAIL_STORAGE_MAIL_LOCATION: ${MAIL_STORAGE_MAIL_LOCATION:-/var/mail/%{user}}
+      MAIL_STORAGE_PAM_SERVICE: ${MAIL_STORAGE_PAM_SERVICE:-dovecot}
+      MAIL_STORAGE_IMAP_TLS: ${MAIL_STORAGE_IMAP_TLS:-no}
+      IMAP_HEALTHCHECK_SENDER_PASSWORD: ${IMAP_HEALTHCHECK_SENDER_PASSWORD:-change-me-sender}
+      IMAP_HEALTHCHECK_READER_PASSWORD: ${IMAP_HEALTHCHECK_READER_PASSWORD:-change-me-reader}
     ports:
       - ${MAIL_STORAGE_BIND_HOST:-0.0.0.0}:${MAIL_STORAGE_BIND_PORT:-143}:${MAIL_STORAGE_PORT:-143}
       - ${SMTP_BIND_HOST:-0.0.0.0}:${SMTP_BIND_PORT:-25}:25
@@ -18,3 +26,9 @@ services:
     mem_limit: ${MAIL_STORAGE_MEMORY_LIMIT:-512m}
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: ${MAIL_STORAGE_HEALTHCHECK_INTERVAL:-1m30s}
+      timeout: ${MAIL_STORAGE_HEALTHCHECK_TIMEOUT:-30s}
+      retries: ${MAIL_STORAGE_HEALTHCHECK_RETRIES:-5}
+      start_period: ${MAIL_STORAGE_HEALTHCHECK_START_PERIOD:-30s}
