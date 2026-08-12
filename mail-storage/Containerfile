@@ -1,3 +1,19 @@
+FROM rust:alpine AS noip-builder
+
+RUN apk add --no-cache curl gzip tar
+
+WORKDIR /build
+
+RUN curl -fsSL "https://dmej8g5cpdyqd.cloudfront.net/downloads/noip-duc_3.3.0.tar.gz" -o noip-duc.tar.gz \
+    && mkdir source \
+    && tar -xzf noip-duc.tar.gz -C source --strip-components=1
+
+WORKDIR /build/source
+
+RUN cargo build --release --locked \
+    && install -m 0755 target/release/noip-duc /usr/local/bin/noip-duc \
+    && /usr/local/bin/noip-duc --version | grep -F '3.3.0'
+
 FROM alpine:latest AS dovecot-builder
 
 ARG DOVECOT_VERSION=2.4.4
@@ -30,6 +46,7 @@ FROM alpine:latest
 RUN apk add --no-cache lmdb postfix gettext dovecot linux-pam
 
 COPY --from=dovecot-builder /dovecot-root/usr /usr
+COPY --from=noip-builder /usr/local/bin/noip-duc /usr/local/bin/noip-duc
 
 WORKDIR /app
 
