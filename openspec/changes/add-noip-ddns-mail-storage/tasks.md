@@ -16,5 +16,5 @@
 
 - [x] 3.1 Extender el health check para detectar el estado DDNS sin exponer credenciales y conservar las verificaciones SMTP/IMAP existentes.
 - [x] 3.2 Documentar en `README.md` el flujo DDNS, conectividad saliente requerida, variables, protección del `.env` y comportamiento ante fallos.
-- [ ] 3.3 Levantar la composición con credenciales de prueba o entorno controlado, comprobar una actualización exitosa del hostname y confirmar que los logs no contienen la contraseña.
-- [ ] 3.4 Verificar regresión de SMTP e IMAP, límites de recursos, `no-new-privileges:true`, reinicio del servicio y resolución del hostname No-IP.
+- [x] 3.3 Levantar la composición con credenciales de prueba o entorno controlado, comprobar una actualización exitosa del hostname y confirmar que los logs no contienen la contraseña.
+- [x] 3.4 Verificar regresión de SMTP e IMAP, límites de recursos, `no-new-privileges:true`, reinicio del servicio y resolución del hostname No-IP.
