@@ -4,6 +4,11 @@ set -eu
 SENDER_PASSWORD=${IMAP_HEALTHCHECK_SENDER_PASSWORD:?Set IMAP_HEALTHCHECK_SENDER_PASSWORD}
 READER_PASSWORD=${IMAP_HEALTHCHECK_READER_PASSWORD:?Set IMAP_HEALTHCHECK_READER_PASSWORD}
 
+if [ ! -s /run/noip-duc.pid ] || ! kill -0 "$(cat /run/noip-duc.pid)" 2>/dev/null; then
+  printf '%s\n' 'No-IP DDNS health check failed: client is not running' >&2
+  exit 1
+fi
+
 cleanup() {
   deluser test-sender >/dev/null 2>&1 || true
   deluser test-reader >/dev/null 2>&1 || true

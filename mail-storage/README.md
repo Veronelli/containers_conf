@@ -1,6 +1,6 @@
 # Mail Storage Container
 
-Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y envía correos SMTP y permite leer buzones locales por IMAP, ambos en texto plano y sin TLS. Expone los puertos 25 y 143, aplica límites de recursos y se configura por variables de entorno.
+Contenedor Alpine con Postfix como MTA, Dovecot como servidor IMAP y No-IP DUC como cliente DDNS. Recibe y envía correos SMTP, permite leer buzones locales por IMAP y mantiene un hostname No-IP actualizado, todo configurado por variables de entorno. Expone los puertos 25 y 143 y aplica límites de recursos.
 
 ## Architecture
 
@@ -9,6 +9,8 @@ Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y en
 - Puerto SMTP (25) expuesto y configurable vía `SMTP_BIND_HOST` y `SMTP_BIND_PORT`.
 - Puerto IMAP (143) expuesto y configurable vía `MAIL_STORAGE_BIND_HOST` y `MAIL_STORAGE_BIND_PORT`.
 - Autenticación IMAP mediante PAM para usuarios locales y buzón mbox en `/var/mail/<usuario>` por defecto.
+- Cliente `noip-duc` 3.3.0 compilado desde el tarball oficial proporcionado y ejecutado dentro del mismo contenedor.
+- El cliente DDNS actualiza periódicamente `NOIP_HOSTNAME` usando las credenciales de `NOIP_USERNAME` y `NOIP_PASSWORD`.
 - Volumen persistente en `./data` para la cola de correos y datos de Postfix.
 - El proceso master de Postfix corre como root (necesario para bindear puerto 25). Los procesos hijos usan `default_privs = nobody`.
 - `no-new-privileges:true` habilitado.
@@ -16,6 +18,7 @@ Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y en
 ## Files
 
 - `Containerfile`: basado en `alpine:latest`, instala Postfix, Dovecot, PAM y `gettext`, y copia los templates de configuración.
+- `Containerfile`: compila `noip-duc` 3.3.0 desde el tarball indicado en un builder Rust y copia solo el binario a la imagen final.
 - `dovecot.conf.template`: plantilla de configuración IMAP, PAM, mbox y TLS deshabilitado.
 - `pam.dovecot`: política PAM local usada por Dovecot.
 - `compose.yaml`: define el servicio, puertos, volumen, y límites de recursos.
@@ -26,12 +29,14 @@ Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y en
 - `run-compose.sh`: wrapper que carga `.env` y ejecuta `docker compose`.
 - `healthcheck-imap.sh`: ejecuta manualmente el mismo health check end-to-end usado por Compose.
 - `healthcheck-container.sh`: runner interno que crea los fixtures, envía y lee un mensaje de prueba y limpia todo al finalizar.
+- `healthcheck-container.sh`: comprueba que el cliente No-IP esté vivo antes de verificar SMTP e IMAP.
 - `compose.yaml`: ejecuta automáticamente el health check end-to-end y marca el servicio como `healthy` solo si SMTP e IMAP funcionan.
 
 ## Prerequisites
 
 - Container runtime (Docker, Podman) instalado.
 - Puertos 25 y 143 libres en el host.
+- Conectividad saliente HTTPS/DNS desde el contenedor hacia No-IP.
 
 ## Quick start
 
@@ -95,6 +100,10 @@ Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y en
 | `MAIL_STORAGE_MAIL_LOCATION` | Ruta mbox del INBOX | `/var/mail/%{user}` |
 | `MAIL_STORAGE_PAM_SERVICE` | Servicio PAM para Dovecot | `dovecot` |
 | `MAIL_STORAGE_IMAP_TLS` | TLS IMAP | `no` |
+| `NOIP_USERNAME` | Usuario de No-IP o credencial del grupo de actualización | vacío |
+| `NOIP_PASSWORD` | Contraseña de No-IP o credencial del grupo de actualización | vacío |
+| `NOIP_HOSTNAME` | Hostname o grupo No-IP que debe actualizarse | vacío |
+| `NOIP_UPDATE_INTERVAL` | Intervalo de detección de cambios de IP; mínimo 2 minutos | `5m` |
 | `SMTP_BIND_HOST` | Host de bind para SMTP | `0.0.0.0` |
 | `SMTP_BIND_PORT` | Puerto SMTP en el host | `25` |
 | `SMTP_MYHOSTNAME` | Hostname de Postfix | `mail.example.com` |
@@ -108,6 +117,10 @@ Contenedor Alpine con Postfix como MTA y Dovecot como servidor IMAP. Recibe y en
 
 - No se implementa TLS/STARTTLS — el tráfico SMTP e IMAP viaja en texto plano.
 - No se configura autenticación SMTP (SASL).
+- No-IP no se inicia si falta `NOIP_USERNAME`, `NOIP_PASSWORD` o `NOIP_HOSTNAME`; Postfix y Dovecot permanecen disponibles, pero el health check queda `unhealthy`.
+- El cliente No-IP se reinicia tras una terminación inesperada y siempre se ejecuta con nivel de log `info` para evitar que el modo debug imprima la contraseña.
+- `NOIP_PASSWORD` solo se entrega al proceso en tiempo de ejecución; no debe escribirse en el repositorio, la imagen ni el volumen `./data`.
+- El archivo `.env` contiene secretos y debe permanecer fuera del control de versiones.
 - Las credenciales del health check son temporales y no deben contener secretos reales ni versionarse.
 - Compose ejecuta automáticamente `healthcheck-container.sh` después del `start_period`; `healthcheck-imap.sh` permite repetirlo manualmente.
 - `SMTP_MYNETWORKS` controla qué redes pueden hacer relay. Por defecto solo localhost.
