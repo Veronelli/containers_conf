@@ -70,3 +70,7 @@ El sistema SHALL permitir validar el flujo completo mediante dos usuarios PAM te
 #### Scenario: Fixture cleanup runs after the health check
 - **WHEN** el health check termina correctamente o con error
 - **THEN** elimina las cuentas PAM temporales `test-sender` y `test-reader`, sus credenciales y los datos de correo creados exclusivamente para la prueba
+
+#### Scenario: Compose reports service health after end-to-end validation
+- **WHEN** el servicio se levanta mediante Compose y ejecuta su health check automático
+- **THEN** Compose marca `mail-storage` como `healthy` solo después de confirmar autenticación PAM, entrega SMTP y lectura IMAP del mensaje de prueba

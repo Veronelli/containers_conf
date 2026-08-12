@@ -54,7 +54,7 @@
 
 ### Decisión 6: Health check con dos usuarios fixture
 
-**Elección**: El health check creará temporalmente los usuarios PAM `test-sender` y `test-reader`. Enviará un mensaje desde `test-sender@mail.example.com` hacia `test-reader@mail.example.com`, con asunto `test`, abrirá la INBOX de `test-reader` por IMAP y verificará remitente y asunto. Las credenciales se inyectarán únicamente durante la prueba y una rutina de limpieza con `trap` eliminará ambos usuarios y sus datos aun si una aserción falla.
+**Elección**: Compose ejecutará automáticamente un runner dentro del contenedor. El runner creará temporalmente los usuarios PAM `test-sender` y `test-reader`, enviará un mensaje desde `test-sender@mail.example.com` hacia `test-reader@mail.example.com`, con asunto `test`, abrirá la INBOX de `test-reader` por IMAP y verificará remitente y asunto. Las credenciales se inyectarán únicamente durante la prueba y una rutina de limpieza con `trap` eliminará ambos usuarios y sus datos aun si una aserción falla. El health check se repite según el intervalo configurado y Compose solo reporta `healthy` cuando la ejecución termina correctamente.
 
 **Alternativa considerada**: Probar solo el listener IMAP o reutilizar cuentas permanentes. Se rechaza porque no valida la integración completa con Postfix y puede contaminar o exponer datos de desarrollo.
 

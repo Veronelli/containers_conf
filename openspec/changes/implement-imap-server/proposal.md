@@ -10,6 +10,7 @@ La composición `mail-storage` ya recibe y envía correo mediante Postfix, pero 
 - Generar la configuración de Dovecot desde variables de entorno y documentar los valores de ejemplo en `.env.example`.
 - Ajustar el entrypoint para inicializar y supervisar Postfix y Dovecot dentro del mismo contenedor.
 - Incorporar un health check end-to-end con los usuarios PAM temporales `test-sender` y `test-reader`: enviar un mensaje con asunto `test` a `test-reader@mail.example.com`, leerlo por IMAP y eliminar ambos fixtures al finalizar.
+- Ejecutar ese health check automáticamente desde `compose.yaml` al levantar el servicio y marcarlo como `healthy` solo cuando el flujo completo sea exitoso.
 - **BREAKING** Mantener IMAP sin TLS/STARTTLS: no se habilitan certificados ni cifrado en este cambio.
 - No agregar ni modificar volúmenes para IMAP; la persistencia y el diseño final del almacenamiento quedan fuera de alcance.
 
