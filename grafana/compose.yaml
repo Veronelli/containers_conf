@@ -1,6 +1,9 @@
 services:
   grafana:
-    image: grafana/grafana:11.5.0
+    image: ${GRAFANA_IMAGE_NAME:-grafana-local}:${GRAFANA_IMAGE_TAG:-11.5.0}
+    build:
+      context: .
+      dockerfile: Containerfile
     container_name: ${GRAFANA_CONTAINER_NAME:-grafana}
     hostname: ${GRAFANA_HOSTNAME:-grafana}
     restart: ${GRAFANA_RESTART_POLICY:-unless-stopped}
@@ -24,7 +27,8 @@ services:
     ports:
       - ${GRAFANA_BIND_HOST:-0.0.0.0}:${GRAFANA_BIND_PORT:-3000}:${GRAFANA_SERVER_PORT:-3000}
     volumes:
-      - ./data:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
+      - ./dashboards:/var/lib/grafana/dashboards:ro
     healthcheck:
       test:
         - CMD-SHELL
@@ -43,4 +47,7 @@ services:
 networks:
   mariadb:
     external: true
+
+volumes:
+  grafana-data:
 
