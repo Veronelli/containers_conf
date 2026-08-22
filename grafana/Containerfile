@@ -7,7 +7,9 @@ RUN apk add --no-cache curl gettext
 COPY provisioning /etc/grafana/provisioning
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod 755 /docker-entrypoint.sh             && mkdir -p /var/lib/grafana/dashboards             && chown -R grafana:grafana /etc/grafana/provisioning
+RUN chmod 755 /docker-entrypoint.sh \
+    && mkdir -p /var/lib/grafana/dashboards \
+    && chown -R grafana:root /etc/grafana/provisioning /var/lib/grafana/dashboards
 
 COPY dashboards /var/lib/grafana/dashboards
 
