@@ -1,0 +1,13 @@
+ARG NGINX_BASE_IMAGE=nginx:1.27-alpine
+FROM ${NGINX_BASE_IMAGE}
+
+USER root
+
+COPY --chown=nginx:nginx docker-entrypoint.sh /usr/local/bin/nginx-gateway-entrypoint
+
+RUN chmod 755 /usr/local/bin/nginx-gateway-entrypoint
+
+USER nginx
+
+ENTRYPOINT ["/usr/local/bin/nginx-gateway-entrypoint"]
+CMD ["nginx", "-g", "daemon off;", "-c", "/tmp/nginx-gateway/nginx.conf"]

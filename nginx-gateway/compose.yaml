@@ -1,0 +1,40 @@
+services:
+  nginx-gateway:
+    image: ${NGINX_IMAGE_NAME:-nginx-gateway-local}:${NGINX_IMAGE_TAG:-1.0.0}
+    build:
+      context: .
+      dockerfile: Containerfile
+      args:
+        NGINX_BASE_IMAGE: ${NGINX_BASE_IMAGE:-nginx:1.27-alpine}
+    container_name: ${NGINX_CONTAINER_NAME:-nginx-gateway}
+    hostname: ${NGINX_HOSTNAME:-nginx-gateway}
+    restart: ${NGINX_RESTART_POLICY:-unless-stopped}
+    env_file:
+      - ${ENV_FILE:-./.env}
+    environment:
+      NGINX_HTTP_PORT: ${NGINX_HTTP_PORT:-8080}
+      NGINX_ROUTES: ${NGINX_ROUTES:?Set NGINX_ROUTES in .env}
+    ports:
+      - ${NGINX_BIND_HOST:-0.0.0.0}:${NGINX_BIND_PORT:-8080}:${NGINX_HTTP_PORT:-8080}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O /dev/null http://127.0.0.1:${NGINX_HTTP_PORT:-8080}/_health || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    cpus: ${NGINX_CPU_LIMIT:-0.50}
+    mem_limit: ${NGINX_MEMORY_LIMIT:-128m}
+    read_only: true
+    tmpfs:
+      - /tmp:uid=101,gid=101,mode=700
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - gateway
+
+networks:
+  gateway:
+    name: ${NGINX_NETWORK_NAME:-shared-services}
+    external: true
